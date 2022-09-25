@@ -36,9 +36,6 @@
             this.clmnPath = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmnDrive = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.clmnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmnNetworkDrive = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.clmnAutoMount = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.menuGrid = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -63,7 +60,7 @@
             this.groupBox1.Controls.Add(this.mountableTable);
             this.groupBox1.Location = new System.Drawing.Point(12, 27);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(897, 336);
+            this.groupBox1.Size = new System.Drawing.Size(612, 336);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Remotes";
@@ -72,6 +69,8 @@
             // 
             this.mountableTable.AllowUserToAddRows = false;
             this.mountableTable.AllowUserToDeleteRows = false;
+            this.mountableTable.AllowUserToResizeColumns = false;
+            this.mountableTable.AllowUserToResizeRows = false;
             this.mountableTable.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
             this.mountableTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.mountableTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -79,9 +78,6 @@
             this.clmnPath,
             this.clmnDrive,
             this.clmnName,
-            this.Column5,
-            this.Column6,
-            this.Column7,
             this.clmnNetworkDrive,
             this.clmnAutoMount});
             this.mountableTable.ContextMenuStrip = this.menuGrid;
@@ -89,7 +85,8 @@
             this.mountableTable.MultiSelect = false;
             this.mountableTable.Name = "mountableTable";
             this.mountableTable.RowTemplate.Height = 25;
-            this.mountableTable.Size = new System.Drawing.Size(885, 292);
+            this.mountableTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.mountableTable.Size = new System.Drawing.Size(600, 292);
             this.mountableTable.TabIndex = 0;
             this.mountableTable.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.mountableTable_CellMouseDown);
             this.mountableTable.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.mountableTable_CellValueChanged);
@@ -99,6 +96,7 @@
             // 
             this.clmnRemote.HeaderText = "Remote Name";
             this.clmnRemote.Name = "clmnRemote";
+            this.clmnRemote.ReadOnly = true;
             this.clmnRemote.Width = 99;
             // 
             // clmnPath
@@ -148,26 +146,6 @@
             this.clmnName.Name = "clmnName";
             this.clmnName.Width = 106;
             // 
-            // Column5
-            // 
-            this.Column5.HeaderText = "Time Mounted";
-            this.Column5.Name = "Column5";
-            this.Column5.ToolTipText = "See how long the drive has been mounted.";
-            this.Column5.Width = 101;
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "Date Added";
-            this.Column6.Name = "Column6";
-            this.Column6.ToolTipText = "See when the drive was first added";
-            this.Column6.Width = 87;
-            // 
-            // Column7
-            // 
-            this.Column7.HeaderText = "Remote Count";
-            this.Column7.Name = "Column7";
-            this.Column7.ToolTipText = "See how many times a drive was mounted.";
-            // 
             // clmnNetworkDrive
             // 
             this.clmnNetworkDrive.HeaderText = "Network Drive";
@@ -202,7 +180,7 @@
             this.gayToolStripMenuItem});
             this.menuMain.Location = new System.Drawing.Point(0, 0);
             this.menuMain.Name = "menuMain";
-            this.menuMain.Size = new System.Drawing.Size(916, 24);
+            this.menuMain.Size = new System.Drawing.Size(630, 24);
             this.menuMain.TabIndex = 1;
             this.menuMain.Text = "menuStrip1";
             // 
@@ -223,6 +201,7 @@
             this.setPathMenuItem.Name = "setPathMenuItem";
             this.setPathMenuItem.Size = new System.Drawing.Size(160, 22);
             this.setPathMenuItem.Text = "Set rclone path";
+            this.setPathMenuItem.Click += new System.EventHandler(this.setPathMenuItem_Click);
             // 
             // autorunOnBootToolStripMenuItem
             // 
@@ -236,6 +215,7 @@
             this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
             this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
+            this.minimizeToTrayToolStripMenuItem.Click += new System.EventHandler(this.minimizeToTrayToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
@@ -254,7 +234,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(916, 372);
+            this.ClientSize = new System.Drawing.Size(630, 372);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -283,17 +263,14 @@
         private ToolStripMenuItem autorunOnBootToolStripMenuItem;
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
+        private ToolStripMenuItem saveToolStripMenuItem;
+        private ContextMenuStrip menuGrid;
+        private ToolStripMenuItem mountToolStripMenuItem;
         private DataGridViewTextBoxColumn clmnRemote;
         private DataGridViewTextBoxColumn clmnPath;
         private DataGridViewComboBoxColumn clmnDrive;
         private DataGridViewTextBoxColumn clmnName;
-        private DataGridViewTextBoxColumn Column5;
-        private DataGridViewTextBoxColumn Column6;
-        private DataGridViewTextBoxColumn Column7;
         private DataGridViewCheckBoxColumn clmnNetworkDrive;
         private DataGridViewCheckBoxColumn clmnAutoMount;
-        private ToolStripMenuItem saveToolStripMenuItem;
-        private ContextMenuStrip menuGrid;
-        private ToolStripMenuItem mountToolStripMenuItem;
     }
 }

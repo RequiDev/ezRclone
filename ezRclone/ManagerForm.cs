@@ -30,7 +30,7 @@ namespace ezRclone
 
             foreach (var mountable in mountables)
             {
-                mountableTable.Rows.Add(mountable.Remote, mountable.Path, mountable.DriveLetter, mountable.Name, DateTime.Now, DateTime.Now, 0, mountable.NetworkDrive, mountable.AutoMount);
+                mountableTable.Rows.Add(mountable.Remote, mountable.Path, mountable.DriveLetter, mountable.Name, mountable.NetworkDrive, mountable.AutoMount);
             }
         }
 
@@ -64,6 +64,13 @@ namespace ezRclone
                     mountable.Path = textbox.Value as string ?? string.Empty;
                 }
             }
+            else if (e.ColumnIndex == clmnName.Index)
+            {
+                if (row.Cells["clmnName"] is DataGridViewTextBoxCell textbox)
+                {
+                    mountable.Name = textbox.Value as string ?? string.Empty;
+                }
+            }
             else if (e.ColumnIndex == clmnDrive.Index)
             {
                 if (row.Cells["clmnDrive"] is DataGridViewComboBoxCell comboBox)
@@ -71,7 +78,7 @@ namespace ezRclone
                     mountable.DriveLetter = comboBox.Value as string ?? string.Empty;
                 }
             }
-            
+
             _rclone.SaveConfig();
         }
 
@@ -138,6 +145,20 @@ namespace ezRclone
             }
 
             c.Selected = true;
+        }
+
+        private void setPathMenuItem_Click(object sender, EventArgs e)
+        {
+            var dlg = new FolderBrowserDialog();
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            _rclone.SetRclonePath(dlg.SelectedPath);
+        }
+
+        private void minimizeToTrayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Hide();
         }
     }
 }

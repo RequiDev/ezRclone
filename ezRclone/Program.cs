@@ -13,12 +13,17 @@ namespace ezRclone
             ApplicationConfiguration.Initialize();
             Application.Run(new ezRclone());
         }
+    }
 
+    public class Settings
+    {
+        public string RclonePath { get; set; } = string.Empty;
+        public List<Mountable> Mountables { get; set; } = new List<Mountable>();
     }
 
     public class ezRclone : ApplicationContext
     {
-        private readonly List<Mountable> _mountables = new List<Mountable>();
+        private readonly Settings _settings = new Settings();
         private readonly Dictionary<string, int> _mounts = new Dictionary<string, int>();
 
         private readonly NotifyIcon _trayIcon;
@@ -26,8 +31,8 @@ namespace ezRclone
 
         public void SaveConfig()
         {
-            var mountsFile = Application.UserAppDataPath + "\\mounts.json";
-            File.WriteAllText(mountsFile, JsonConvert.SerializeObject(_mountables));
+            var settingsFile = Application.UserAppDataPath + "\\settings.json";
+            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(_settings));
         }
 
         public ezRclone()
@@ -35,11 +40,11 @@ namespace ezRclone
             var contextMenu = new ContextMenuStrip();
 
             // check if mounts.json exists in appdata
-            var mountsFile = Application.UserAppDataPath + "\\mounts.json";
-            if (File.Exists(mountsFile))
+            var settingsFile = Application.UserAppDataPath + "\\settings.json";
+            if (File.Exists(settingsFile))
             {
                 // load mounts.json
-                _mountables = JsonConvert.DeserializeObject<List<Mountable>>(File.ReadAllText(mountsFile)) ?? new List<Mountable>();
+                _settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(settingsFile)) ?? new Settings();
             }
 
             var rcloneConfig = File.ReadAllText(GetRCloneConfigPath());
@@ -52,14 +57,13 @@ namespace ezRclone
 
                 var remoteName = remote.Name.ToString();
 
-                if (_mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
+                if (_settings.Mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
                     continue;
 
-                _mountables.Add(new Mountable
+                _settings.Mountables.Add(new Mountable
                 {
                     AutoMount = true,
                     DriveLetter = string.Empty,
-                    Mounted = false,
                     Name = remoteName,
                     NetworkDrive = false,
                     Path = string.Empty,
@@ -69,7 +73,7 @@ namespace ezRclone
 
             contextMenu.Items.Add("Manage", null, OpenManager);
 
-            foreach (var mountable in _mountables)
+            foreach (var mountable in _settings.Mountables)
             {
                 var item = new ToolStripMenuItem(mountable.Name);
 
@@ -101,6 +105,11 @@ namespace ezRclone
                 item.DropDownItems.Add(new ToolStripMenuItem("Set Path", null, (sender, args) => {}));
 
                 contextMenu.Items.Add(item);
+
+                if (mountable.AutoMount)
+                {
+                    Mount(mountable);
+                }
             }
 
             contextMenu.Items.Add("Exit", null, Exit);
@@ -111,13 +120,15 @@ namespace ezRclone
                 Visible = true
             };
             _trayIcon.DoubleClick += OpenManager;
+
+            OpenManager(null, null);
         }
 
-        private void OpenManager(object? s, EventArgs e)
+        private void OpenManager(object? s, EventArgs? e)
         {
             if (_managerForm == null || _managerForm.IsDisposed)
             {
-                _managerForm = new ManagerForm(this, _mountables);
+                _managerForm = new ManagerForm(this, _settings.Mountables);
             }
 
             _managerForm.Show();
@@ -125,7 +136,7 @@ namespace ezRclone
 
         public Mountable GetMountable(int index)
         {
-            return _mountables[index];
+            return _settings.Mountables[index];
         }
 
         private void Exit(object? sender, EventArgs e)
@@ -148,7 +159,7 @@ namespace ezRclone
 
         public void Mount(Mountable mountable)
         {
-            var psi = new ProcessStartInfo("rclone.exe", $"mount {mountable.Remote}:\"{mountable.Path}\" {mountable.DriveLetter}:")
+            var psi = new ProcessStartInfo(Path.Combine(_settings.RclonePath, "rclone.exe"), $"mount {mountable.Remote}:\"{mountable.Path}\" {mountable.DriveLetter}:")
             {
                 CreateNoWindow = true
             };
@@ -181,14 +192,13 @@ namespace ezRclone
             {
                 return _rcloneConfigPath;
             }
-            
-            var psi = new ProcessStartInfo("rclone.exe", "config file")
+
+            var p = Process.Start(new ProcessStartInfo("rclone.exe", "config file")
             {
                 CreateNoWindow = true,
                 RedirectStandardOutput = true
-            };
+            });
 
-            var p = Process.Start(psi);
             if (p == null)
                 return string.Empty;
                 
@@ -196,6 +206,12 @@ namespace ezRclone
             _rcloneConfigPath = p.StandardOutput.ReadToEnd().Replace("Configuration file is stored at:\n", string.Empty).Trim();
 
             return _rcloneConfigPath;
+        }
+
+        public void SetRclonePath(string rclonePath)
+        {
+            _settings.RclonePath = rclonePath;
+            SaveConfig();
         }
     }
 }
