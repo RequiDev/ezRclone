@@ -12,28 +12,26 @@ namespace ezRclone
         {
             ApplicationConfiguration.Initialize();
             Application.Run(new ezRclone());
-            // Remote("google-drive", "G:", "Plex Media", "Google Drive");
         }
 
     }
 
-    internal class ezRclone : ApplicationContext
+    public class ezRclone : ApplicationContext
     {
         private readonly List<Mountable> _mountables = new List<Mountable>();
         private readonly Dictionary<string, int> _mounts = new Dictionary<string, int>();
 
         private readonly NotifyIcon _trayIcon;
-        private ManagerForm _managerForm;
+        private ManagerForm? _managerForm;
+
+        public void SaveConfig()
+        {
+            var mountsFile = Application.UserAppDataPath + "\\mounts.json";
+            File.WriteAllText(mountsFile, JsonConvert.SerializeObject(_mountables));
+        }
+
         public ezRclone()
         {
-            var rcloneConfig = File.ReadAllText(GetRCloneConfigPath());
-            var toml = Toml.Parse(rcloneConfig);
-
-            // foreach (var gay in toml.Tables)
-            // {
-            //     MessageBox.Show(gay.Name.ToString(), "", MessageBoxButtons.AbortRetryIgnore);
-            // }
-
             var contextMenu = new ContextMenuStrip();
 
             // check if mounts.json exists in appdata
@@ -44,42 +42,62 @@ namespace ezRclone
                 _mountables = JsonConvert.DeserializeObject<List<Mountable>>(File.ReadAllText(mountsFile)) ?? new List<Mountable>();
             }
 
-            contextMenu.Items.Add("Manage", null, (s, e) =>
+            var rcloneConfig = File.ReadAllText(GetRCloneConfigPath());
+            var toml = Toml.Parse(rcloneConfig);
+
+            foreach (var remote in toml.Tables)
             {
-                if (_managerForm == null || _managerForm.IsDisposed)
+                if (remote.Name == null)
+                    continue;
+
+                var remoteName = remote.Name.ToString();
+
+                if (_mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
+                    continue;
+
+                _mountables.Add(new Mountable
                 {
-                    _managerForm = new ManagerForm(_mountables);
-                }
+                    AutoMount = true,
+                    DriveLetter = string.Empty,
+                    Mounted = false,
+                    Name = remoteName,
+                    NetworkDrive = false,
+                    Path = string.Empty,
+                    Remote = remoteName
+                });
+            }
 
-                _managerForm.Show();
-            });
-
-            // local testing
-            _mountables.Add(new Mountable
-            {
-                AutoMount = true,
-                DriveLetter = "G",
-                Name = "Google Drive",
-                Remote = "google-drive",
-                Path = "Plex Media",
-                Mounted = false
-            });
-            
-            _mountables.Add(new Mountable
-            {
-                AutoMount = true,
-                DriveLetter = "P",
-                Name = "Plex",
-                Remote = "plex",
-                Path = "/plex-media",
-                Mounted = false,
-                NetworkDrive = false
-            });
+            contextMenu.Items.Add("Manage", null, OpenManager);
 
             foreach (var mountable in _mountables)
             {
                 var item = new ToolStripMenuItem(mountable.Name);
-                item.DropDownItems.Add(new ToolStripMenuItem("Mount", null, (sender, args) => Mount(((ToolStripMenuItem)sender!), mountable)));
+
+                void OnClick(object? sender, EventArgs args)
+                {
+                    if (string.IsNullOrEmpty(mountable.DriveLetter))
+                    {
+                        MessageBox.Show("Can't mount drive without a letter.", "Error", MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    if (sender is ToolStripMenuItem toolstripMenuItem)
+                    {
+                        if (_mounts.ContainsKey(mountable.DriveLetter))
+                        {
+                            Unmount(mountable.DriveLetter);
+                            toolstripMenuItem.Text = "Mount";
+                        }
+                        else
+                        {
+                            Mount(mountable);
+                            toolstripMenuItem.Text = "Unmount";
+                        }
+                    }
+                }
+
+                item.DropDownItems.Add(new ToolStripMenuItem("Mount", null, OnClick));
                 item.DropDownItems.Add(new ToolStripMenuItem("Set Path", null, (sender, args) => {}));
 
                 contextMenu.Items.Add(item);
@@ -92,7 +110,24 @@ namespace ezRclone
                 ContextMenuStrip = contextMenu,
                 Visible = true
             };
+            _trayIcon.DoubleClick += OpenManager;
         }
+
+        private void OpenManager(object? s, EventArgs e)
+        {
+            if (_managerForm == null || _managerForm.IsDisposed)
+            {
+                _managerForm = new ManagerForm(this, _mountables);
+            }
+
+            _managerForm.Show();
+        }
+
+        public Mountable GetMountable(int index)
+        {
+            return _mountables[index];
+        }
+
         private void Exit(object? sender, EventArgs e)
         {
             // Hide tray icon, otherwise it will remain shown until user mouses over it
@@ -100,15 +135,16 @@ namespace ezRclone
             Application.Exit();
         }
 
-        private void Mount(ToolStripMenuItem sender, Mountable mountable)
+        private void Unmount(string driveLetter)
+        {
+            Process.GetProcessById(_mounts[driveLetter]).Kill(true);
+            _mounts.Remove(driveLetter);
+        }
+
+        private void Mount(Mountable mountable)
         {
             if (_mounts.ContainsKey(mountable.DriveLetter))
             {
-                Process.GetProcessById(_mounts[mountable.DriveLetter]).Kill(true);
-                _mounts.Remove(mountable.DriveLetter);
-
-                sender.Text = "Mount";
-                return;
             }
 
             var psi = new ProcessStartInfo("rclone.exe", $"mount {mountable.Remote}:\"{mountable.Path}\" {mountable.DriveLetter}:")
@@ -134,12 +170,17 @@ namespace ezRclone
                 return;
             }
 
-            sender.Text = "Unmount";
             _mounts[mountable.DriveLetter] = p.Id;
         }
 
-        private static string GetRCloneConfigPath()
+        private string _rcloneConfigPath;
+        private string GetRCloneConfigPath()
         {
+            if (!string.IsNullOrEmpty(_rcloneConfigPath))
+            {
+                return _rcloneConfigPath;
+            }
+            
             var psi = new ProcessStartInfo("rclone.exe", "config file")
             {
                 CreateNoWindow = true,
@@ -149,9 +190,11 @@ namespace ezRclone
             var p = Process.Start(psi);
             if (p == null)
                 return string.Empty;
-            
+                
             p.WaitForExit();
-            return p.StandardOutput.ReadToEnd().Replace("Configuration file is stored at:\n", string.Empty).Trim();
+            _rcloneConfigPath = p.StandardOutput.ReadToEnd().Replace("Configuration file is stored at:\n", string.Empty).Trim();
+
+            return _rcloneConfigPath;
         }
     }
 }

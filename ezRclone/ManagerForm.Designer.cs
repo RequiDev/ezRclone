@@ -42,9 +42,10 @@
             this.clmnAutoMount = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.gayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gayToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.setPathMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autorunOnBootToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.minimizeToTrayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mountableTable)).BeginInit();
@@ -86,6 +87,7 @@
             this.mountableTable.Size = new System.Drawing.Size(885, 292);
             this.mountableTable.TabIndex = 0;
             this.mountableTable.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.mountableTable_CellValueChanged);
+            this.mountableTable.CurrentCellDirtyStateChanged += new System.EventHandler(this.mountableTable_CurrentCellDirtyStateChanged);
             // 
             // clmnRemote
             // 
@@ -188,19 +190,20 @@
             // gayToolStripMenuItem
             // 
             this.gayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.gayToolStripMenuItem1,
+            this.setPathMenuItem,
             this.autorunOnBootToolStripMenuItem,
             this.minimizeToTrayToolStripMenuItem,
+            this.saveToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.gayToolStripMenuItem.Name = "gayToolStripMenuItem";
             this.gayToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.gayToolStripMenuItem.Text = "Options";
             // 
-            // gayToolStripMenuItem1
+            // setPathMenuItem
             // 
-            this.gayToolStripMenuItem1.Name = "gayToolStripMenuItem1";
-            this.gayToolStripMenuItem1.Size = new System.Drawing.Size(163, 22);
-            this.gayToolStripMenuItem1.Text = "Set rclone path";
+            this.setPathMenuItem.Name = "setPathMenuItem";
+            this.setPathMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.setPathMenuItem.Text = "Set rclone path";
             // 
             // autorunOnBootToolStripMenuItem
             // 
@@ -213,6 +216,13 @@
             this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
             this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -248,7 +258,7 @@
         private DataGridView mountableTable;
         private MenuStrip menuMain;
         private ToolStripMenuItem gayToolStripMenuItem;
-        private ToolStripMenuItem gayToolStripMenuItem1;
+        private ToolStripMenuItem setPathMenuItem;
         private ToolStripMenuItem autorunOnBootToolStripMenuItem;
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
@@ -261,5 +271,6 @@
         private DataGridViewTextBoxColumn Column7;
         private DataGridViewCheckBoxColumn clmnNetworkDrive;
         private DataGridViewCheckBoxColumn clmnAutoMount;
+        private ToolStripMenuItem saveToolStripMenuItem;
     }
 }
