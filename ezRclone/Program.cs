@@ -84,9 +84,9 @@ namespace ezRclone
 
                     if (sender is ToolStripMenuItem toolstripMenuItem)
                     {
-                        if (_mounts.ContainsKey(mountable.DriveLetter))
+                        if (_mounts.ContainsKey(mountable.Remote))
                         {
-                            Unmount(mountable.DriveLetter);
+                            Unmount(mountable);
                             toolstripMenuItem.Text = "Mount";
                         }
                         else
@@ -135,18 +135,19 @@ namespace ezRclone
             Application.Exit();
         }
 
-        private void Unmount(string driveLetter)
+        public bool IsMounted(Mountable mountable)
         {
-            Process.GetProcessById(_mounts[driveLetter]).Kill(true);
-            _mounts.Remove(driveLetter);
+            return _mounts.ContainsKey(mountable.Remote);
         }
 
-        private void Mount(Mountable mountable)
+        public void Unmount(Mountable mountable)
         {
-            if (_mounts.ContainsKey(mountable.DriveLetter))
-            {
-            }
+            Process.GetProcessById(_mounts[mountable.Remote]).Kill(true);
+            _mounts.Remove(mountable.Remote);
+        }
 
+        public void Mount(Mountable mountable)
+        {
             var psi = new ProcessStartInfo("rclone.exe", $"mount {mountable.Remote}:\"{mountable.Path}\" {mountable.DriveLetter}:")
             {
                 CreateNoWindow = true
@@ -170,7 +171,7 @@ namespace ezRclone
                 return;
             }
 
-            _mounts[mountable.DriveLetter] = p.Id;
+            _mounts[mountable.Remote] = p.Id;
         }
 
         private string _rcloneConfigPath;
