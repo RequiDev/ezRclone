@@ -202,32 +202,33 @@
             // setPathMenuItem
             // 
             this.setPathMenuItem.Name = "setPathMenuItem";
-            this.setPathMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.setPathMenuItem.Size = new System.Drawing.Size(180, 22);
             this.setPathMenuItem.Text = "Set rclone path";
             // 
             // autorunOnBootToolStripMenuItem
             // 
             this.autorunOnBootToolStripMenuItem.Name = "autorunOnBootToolStripMenuItem";
-            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-            this.autorunOnBootToolStripMenuItem.Text = "Autorun on boot";
+            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autorunOnBootToolStripMenuItem.Text = "Autostart";
+            this.autorunOnBootToolStripMenuItem.Click += new System.EventHandler(this.autorunOnBootToolStripMenuItem_Click);
             // 
             // minimizeToTrayToolStripMenuItem
             // 
             this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
-            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             // 
             // ManagerForm

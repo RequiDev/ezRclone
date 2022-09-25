@@ -1,4 +1,5 @@
 using ezRclone;
+using Microsoft.Win32;
 using DataGridViewDataErrorContexts = System.Windows.Forms.DataGridViewDataErrorContexts;
 
 namespace ezRclone
@@ -7,15 +8,13 @@ namespace ezRclone
     {
         private readonly ezRclone _rclone;
 
-        private readonly List<int> _checkboxes = new List<int>();
-
+        private readonly RegistryKey _rkRun = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!;
         public ManagerForm(ezRclone rclone, List<Mountable> mountables)
         {
             _rclone = rclone;
             InitializeComponent();
 
-            _checkboxes.Add(clmnAutoMount.Index);
-            _checkboxes.Add(clmnNetworkDrive.Index);
+            autorunOnBootToolStripMenuItem.Checked = _rkRun.GetValue("ezRclone") != null;
 
             // iterate all drive letters and add them to the list
             //for (var c = 'A'; c <= 'Z'; c++)
@@ -86,6 +85,20 @@ namespace ezRclone
             if (mountableTable.IsCurrentCellDirty)
             {
                 mountableTable.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
+        }
+
+        private void autorunOnBootToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            autorunOnBootToolStripMenuItem.Checked = !autorunOnBootToolStripMenuItem.Checked;
+
+            if (autorunOnBootToolStripMenuItem.Checked)
+            {
+                _rkRun.SetValue("ezRclone", Application.ExecutablePath);
+            }
+            else
+            {
+                _rkRun.DeleteValue("ezRclone", false);
             }
         }
     }
