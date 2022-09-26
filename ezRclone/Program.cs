@@ -204,7 +204,7 @@ namespace ezRclone
             _mounts[mountable.Remote] = p.Id;
         }
 
-        private string _rcloneConfigPath;
+        private string? _rcloneConfigPath;
         private string GetRCloneConfigPath()
         {
             if (!string.IsNullOrEmpty(_rcloneConfigPath))
@@ -228,7 +228,7 @@ namespace ezRclone
 
                 return _rcloneConfigPath;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return string.Empty;
             }
