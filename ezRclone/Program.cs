@@ -32,7 +32,7 @@ namespace ezRclone
         public void SaveConfig()
         {
             var settingsFile = Application.UserAppDataPath + "\\settings.json";
-            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(_settings));
+            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(_settings, Formatting.Indented));
         }
 
         public ezRclone()
