@@ -47,35 +47,9 @@ namespace ezRclone
                 _settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(settingsFile)) ?? new Settings();
             }
 
-            var rcloneConfigPath = GetRCloneConfigPath();
-            if (!string.IsNullOrEmpty(rcloneConfigPath) && File.Exists(rcloneConfigPath))
-            {
-                var rcloneConfig = File.ReadAllText(rcloneConfigPath);
-                var toml = Toml.Parse(rcloneConfig);
-
-                foreach (var remote in toml.Tables)
-                {
-                    if (remote.Name == null)
-                        continue;
-
-                    var remoteName = remote.Name.ToString();
-
-                    if (_settings.Mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
-                        continue;
-
-                    _settings.Mountables.Add(new Mountable
-                    {
-                        AutoMount = true,
-                        DriveLetter = string.Empty,
-                        Name = remoteName,
-                        NetworkDrive = false,
-                        Path = string.Empty,
-                        Remote = remoteName
-                    });
-                }
-            }
-
             contextMenu.Items.Add("Manage", null, OpenManager);
+
+            ReloadMountables();
 
             foreach (var mountable in _settings.Mountables)
             {
@@ -223,6 +197,39 @@ namespace ezRclone
         {
             _settings.RclonePath = rclonePath;
             SaveConfig();
+
+            ReloadMountables();
+        }
+
+        private void ReloadMountables()
+        {
+            var rcloneConfigPath = GetRCloneConfigPath();
+            if (!File.Exists(rcloneConfigPath))
+                return;
+            
+            var rcloneConfig = File.ReadAllText(rcloneConfigPath);
+            var toml = Toml.Parse(rcloneConfig);
+
+            foreach (var remote in toml.Tables)
+            {
+                if (remote.Name == null)
+                    continue;
+
+                var remoteName = remote.Name.ToString();
+
+                if (_settings.Mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
+                    continue;
+
+                _settings.Mountables.Add(new Mountable
+                {
+                    AutoMount = true,
+                    DriveLetter = string.Empty,
+                    Name = remoteName,
+                    NetworkDrive = false,
+                    Path = string.Empty,
+                    Remote = remoteName
+                });
+            }
         }
     }
 }
