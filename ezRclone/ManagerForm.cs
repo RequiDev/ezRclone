@@ -163,7 +163,7 @@ namespace ezRclone
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            _rclone.Exit(sender, e);
         }
     }
 }

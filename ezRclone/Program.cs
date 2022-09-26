@@ -139,7 +139,7 @@ namespace ezRclone
             return _settings.Mountables[index];
         }
 
-        private void Exit(object? sender, EventArgs e)
+        public void Exit(object? sender, EventArgs e)
         {
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             _trayIcon.Visible = false;
