@@ -199,7 +199,7 @@ namespace ezRclone
 
             try
             {
-                var p = Process.Start(new ProcessStartInfo("rclone.exe", "config file")
+                var p = Process.Start(new ProcessStartInfo(Path.Combine(_settings.RclonePath, "rclone.exe"), "config file")
                 {
                     CreateNoWindow = true,
                     RedirectStandardOutput = true
