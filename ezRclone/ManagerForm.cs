@@ -145,5 +145,15 @@ namespace ezRclone
         {
             _rclone.Exit(sender, e);
         }
+
+        private void mountAllMenuItem_Click(object sender, EventArgs e)
+        {
+            _rclone.MountAll();
+        }
+
+        private void unmountAllMenuItem_Click(object sender, EventArgs e)
+        {
+            _rclone.UnmountAll();
+        }
     }
 }

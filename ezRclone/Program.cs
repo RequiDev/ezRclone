@@ -248,5 +248,21 @@ namespace ezRclone
                 });
             }
         }
+
+        public void MountAll()
+        {
+            foreach (var mountable in _settings.Mountables.Where(mountable => !IsMounted(mountable)))
+            {
+                Mount(mountable);
+            }
+        }
+
+        public void UnmountAll()
+        {
+            foreach (var mountable in _settings.Mountables.Where(IsMounted))
+            {
+                Unmount(mountable);
+            }
+        }
     }
 }
