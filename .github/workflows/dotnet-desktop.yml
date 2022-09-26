@@ -43,7 +43,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: |
-          ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
+          ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish\ezRclone.exe
         tag: ${{ steps.tag_version.outputs.new_tag }}
         name: Release ${{ steps.tag_version.outputs.new_tag }}
         body: ${{ steps.tag_version.outputs.changelog }}
