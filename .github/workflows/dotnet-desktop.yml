@@ -22,23 +22,14 @@ jobs:
       with:
         dotnet-version: 6.0.x
       
-    - name: Restore dependencies
-      run: dotnet restore
-      
     - name: Build
-      run: dotnet build --no-restore -c ${{ matrix.configuration }}
+      run:  dotnet publish -r win-x64 -c ${{ matrix.configuration }} -p:PublishSingleFile=true --self-contained false
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: Artifacts
         path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows
-      
-    - name: Zip output files
-      if: github.ref_name == 'master' && matrix.configuration == 'Release'
-      uses: montudor/action-zip@v1.0.0
-      with:
-        args: zip -qq -r ezRclone-${{ steps.tag_version.outputs.new_tag }}.zip ezRclone\bin\${{ matrix.configuration }}\net6.0-windows
       
     - name: Bump version and push tag
       if: github.ref_name == 'master' && matrix.configuration == 'Release'
@@ -52,7 +43,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: |
-          ezRclone-${{ steps.tag_version.outputs.new_tag }}.zip
+          ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
         tag: ${{ steps.tag_version.outputs.new_tag }}
         name: Release ${{ steps.tag_version.outputs.new_tag }}
         body: ${{ steps.tag_version.outputs.changelog }}
