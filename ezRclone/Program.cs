@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using Tomlyn;
@@ -51,6 +52,24 @@ namespace ezRclone
 
             ReloadMountables();
 
+            var rcloneProcesses = Process.GetProcessesByName("rclone");
+            foreach (var p in rcloneProcesses)
+            {
+                foreach (var mountable in _settings.Mountables)
+                {
+                    var arguments = p.GetCommandLine();
+                    if (arguments.Contains(mountable.Remote) && arguments.Contains("mount"))
+                    {
+                        _mounts.Add(mountable.Remote, p.Id);
+
+                        p.Exited += (_, _) =>
+                        {
+                            _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
+                        };
+                    }
+                }
+            }
+
             foreach (var mountable in _settings.Mountables)
             {
                 var item = new ToolStripMenuItem(mountable.Name)
@@ -101,7 +120,7 @@ namespace ezRclone
                     }
                 };
 
-                if (mountable.AutoMount)
+                if (mountable.AutoMount && !IsMounted(mountable))
                 {
                     Mount(mountable);
                 }
@@ -176,6 +195,11 @@ namespace ezRclone
             {
                 return;
             }
+
+            p.Exited += (_, _) =>
+            {
+                _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
+            };
 
             _mounts[mountable.Remote] = p.Id;
         }
