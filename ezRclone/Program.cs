@@ -53,7 +53,10 @@ namespace ezRclone
 
             foreach (var mountable in _settings.Mountables)
             {
-                var item = new ToolStripMenuItem(mountable.Name);
+                var item = new ToolStripMenuItem(mountable.Name)
+                {
+                    Name = mountable.Remote
+                };
 
                 void OnClick(object? sender, EventArgs args)
                 {
@@ -66,7 +69,7 @@ namespace ezRclone
 
                     if (sender is ToolStripMenuItem toolstripMenuItem)
                     {
-                        if (_mounts.ContainsKey(mountable.Remote))
+                        if (IsMounted(mountable))
                         {
                             Unmount(mountable);
                             toolstripMenuItem.Text = "Mount";
@@ -79,10 +82,24 @@ namespace ezRclone
                     }
                 }
 
-                item.DropDownItems.Add(new ToolStripMenuItem("Mount", null, OnClick));
-                item.DropDownItems.Add(new ToolStripMenuItem("Set Path", null, (sender, args) => {}));
-
+                item.DropDownItems.Add(new ToolStripMenuItem("Mount", null, OnClick)
+                {
+                    Name = "itmMount"
+                });
+                // item.DropDownItems.Add(new ToolStripMenuItem("Set Path", null, (sender, args) => {}));
+                
                 contextMenu.Items.Add(item);
+
+                contextMenu.Opened += (sender, args) =>
+                {
+                    foreach (var m in _settings.Mountables)
+                    {
+                        if (contextMenu.Items[m.Remote] is ToolStripMenuItem itm)
+                        {
+                            itm.DropDownItems["itmMount"].Text = IsMounted(m) ? "Unmount" : "Mount";
+                        }
+                    }
+                };
 
                 if (mountable.AutoMount)
                 {
