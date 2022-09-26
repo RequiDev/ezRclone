@@ -2,7 +2,7 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "master", "actions-test" ]
+    branches: [ "master", "actions-test", "dev" ]
     paths-ignore:
       - '**/README.md'
   pull_request:
