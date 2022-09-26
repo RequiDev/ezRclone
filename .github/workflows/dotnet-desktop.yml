@@ -1,0 +1,51 @@
+name: .NET Core Desktop
+
+on:
+  push:
+    branches: [ "master", "actions-test" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+      
+    - name: Build
+      run:  dotnet publish -r win-x64 -c ${{ matrix.configuration }} -p:PublishSingleFile=true --self-contained false
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Artifacts-${{ matrix.configuration }}
+        path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
+      
+    - name: Bump version and push tag
+      if: github.ref_name == 'master' && matrix.configuration == 'Release' && github.event == 'push'
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Publish a release
+      if: github.ref_name == 'master' && matrix.configuration == 'Release' && github.event == 'push'
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: |
+          ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
+        tag: ${{ steps.tag_version.outputs.new_tag }}
+        name: Release ${{ steps.tag_version.outputs.new_tag }}
+        body: ${{ steps.tag_version.outputs.changelog }}
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
