@@ -199,36 +199,37 @@
             // setPathMenuItem
             // 
             this.setPathMenuItem.Name = "setPathMenuItem";
-            this.setPathMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.setPathMenuItem.Size = new System.Drawing.Size(180, 22);
             this.setPathMenuItem.Text = "Set rclone path";
             this.setPathMenuItem.Click += new System.EventHandler(this.setPathMenuItem_Click);
             // 
             // autorunOnBootToolStripMenuItem
             // 
             this.autorunOnBootToolStripMenuItem.Name = "autorunOnBootToolStripMenuItem";
-            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autorunOnBootToolStripMenuItem.Text = "Autostart";
             this.autorunOnBootToolStripMenuItem.Click += new System.EventHandler(this.autorunOnBootToolStripMenuItem_Click);
             // 
             // minimizeToTrayToolStripMenuItem
             // 
             this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
-            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
             this.minimizeToTrayToolStripMenuItem.Click += new System.EventHandler(this.minimizeToTrayToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // ManagerForm
             // 
