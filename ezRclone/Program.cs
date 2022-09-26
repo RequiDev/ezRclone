@@ -47,28 +47,32 @@ namespace ezRclone
                 _settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(settingsFile)) ?? new Settings();
             }
 
-            var rcloneConfig = File.ReadAllText(GetRCloneConfigPath());
-            var toml = Toml.Parse(rcloneConfig);
-
-            foreach (var remote in toml.Tables)
+            var rcloneConfigPath = GetRCloneConfigPath();
+            if (!string.IsNullOrEmpty(rcloneConfigPath) && File.Exists(rcloneConfigPath))
             {
-                if (remote.Name == null)
-                    continue;
+                var rcloneConfig = File.ReadAllText(rcloneConfigPath);
+                var toml = Toml.Parse(rcloneConfig);
 
-                var remoteName = remote.Name.ToString();
-
-                if (_settings.Mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
-                    continue;
-
-                _settings.Mountables.Add(new Mountable
+                foreach (var remote in toml.Tables)
                 {
-                    AutoMount = true,
-                    DriveLetter = string.Empty,
-                    Name = remoteName,
-                    NetworkDrive = false,
-                    Path = string.Empty,
-                    Remote = remoteName
-                });
+                    if (remote.Name == null)
+                        continue;
+
+                    var remoteName = remote.Name.ToString();
+
+                    if (_settings.Mountables.FirstOrDefault(m => m.Remote == remoteName) != null)
+                        continue;
+
+                    _settings.Mountables.Add(new Mountable
+                    {
+                        AutoMount = true,
+                        DriveLetter = string.Empty,
+                        Name = remoteName,
+                        NetworkDrive = false,
+                        Path = string.Empty,
+                        Remote = remoteName
+                    });
+                }
             }
 
             contextMenu.Items.Add("Manage", null, OpenManager);
@@ -193,19 +197,26 @@ namespace ezRclone
                 return _rcloneConfigPath;
             }
 
-            var p = Process.Start(new ProcessStartInfo("rclone.exe", "config file")
+            try
             {
-                CreateNoWindow = true,
-                RedirectStandardOutput = true
-            });
+                var p = Process.Start(new ProcessStartInfo("rclone.exe", "config file")
+                {
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true
+                });
 
-            if (p == null)
+                if (p == null)
+                    return string.Empty;
+
+                p.WaitForExit();
+                _rcloneConfigPath = p.StandardOutput.ReadToEnd().Replace("Configuration file is stored at:\n", string.Empty).Trim();
+
+                return _rcloneConfigPath;
+            }
+            catch (Exception e)
+            {
                 return string.Empty;
-                
-            p.WaitForExit();
-            _rcloneConfigPath = p.StandardOutput.ReadToEnd().Replace("Configuration file is stored at:\n", string.Empty).Trim();
-
-            return _rcloneConfigPath;
+            }
         }
 
         public void SetRclonePath(string rclonePath)
