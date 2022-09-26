@@ -16,12 +16,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
-    - name: Bump version and push tag
-      id: tag_version
-      uses: mathieudutour/github-tag-action@v6.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -32,26 +26,29 @@ jobs:
       run: dotnet restore
       
     - name: Build
-      run: dotnet build --no-restore -c $env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+      run: dotnet build --no-restore -c ${{ matrix.configuration }}
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: MSIX Package
-        path: ezRclone\bin\$env:Configuration\net6.0-windows
+        name: Artifacts
+        path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows
       
-    - name: action-zip
-      if: github.ref_name == 'master'
+    - name: Zip output files
+      if: github.ref_name == 'master' && matrix.configuration == 'Release'
       uses: montudor/action-zip@v1.0.0
       with:
-        args: zip -qq -r ezRclone-${{ steps.tag_version.outputs.new_tag }}.zip ezRclone\bin\$env:Configuration\net6.0-windows
-      env:
-        Configuration: ${{ matrix.configuration }}
+        args: zip -qq -r ezRclone-${{ steps.tag_version.outputs.new_tag }}.zip ezRclone\bin\${{ matrix.configuration }}\net6.0-windows
+      
+    - name: Bump version and push tag
+      if: github.ref_name == 'master' && matrix.configuration == 'Release'
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Publish a release
-      if: github.ref_name == 'master'
+      if: github.ref_name == 'master' && matrix.configuration == 'Release'
       uses: ncipollo/release-action@v1
       with:
         artifacts: |
