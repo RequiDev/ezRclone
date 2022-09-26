@@ -122,26 +122,6 @@ namespace ezRclone
             {
                 c.DataGridView.ClearSelection();
                 c.DataGridView.CurrentCell = c;
-
-                var rowIndex = e.RowIndex;
-                var mountable = _rclone.GetMountable(rowIndex);
-                var strip = new ContextMenuStrip();
-                if (!_rclone.IsMounted(mountable))
-                {
-                    strip.Items.Add("Mount", null, (_, _) =>
-                    {
-                        _rclone.Mount(mountable);
-                    });
-                }
-                else
-                {
-                    strip.Items.Add("Unmount", null, (_, _) =>
-                    {
-                        _rclone.Unmount(mountable);
-                    });
-                }
-
-                c.ContextMenuStrip = strip;
             }
 
             c.Selected = true;
