@@ -28,8 +28,8 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: Artifacts
-        path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows
+        name: Artifacts-${{ matrix.configuration }}
+        path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\publish
       
     - name: Bump version and push tag
       if: github.ref_name == 'master' && matrix.configuration == 'Release'
