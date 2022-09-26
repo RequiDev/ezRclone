@@ -32,14 +32,14 @@ jobs:
         path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
       
     - name: Bump version and push tag
-      if: github.ref_name == 'master' && matrix.configuration == 'Release'
+      if: github.ref_name == 'master' && matrix.configuration == 'Release' && github.event == 'push'
       id: tag_version
       uses: mathieudutour/github-tag-action@v6.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Publish a release
-      if: github.ref_name == 'master' && matrix.configuration == 'Release'
+      if: github.ref_name == 'master' && matrix.configuration == 'Release' && github.event == 'push'
       uses: ncipollo/release-action@v1
       with:
         artifacts: |
