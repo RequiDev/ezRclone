@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManagerForm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.mountableTable = new System.Windows.Forms.DataGridView();
@@ -38,18 +37,17 @@
             this.clmnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmnNetworkDrive = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.clmnAutoMount = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.menuGrid = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.mountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.gayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mountAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.unmountAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setPathMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autorunOnBootToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.minimizeToTrayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.minimizeToTrayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mountableTable)).BeginInit();
-            this.menuGrid.SuspendLayout();
             this.menuMain.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -80,7 +78,6 @@
             this.clmnName,
             this.clmnNetworkDrive,
             this.clmnAutoMount});
-            this.mountableTable.ContextMenuStrip = this.menuGrid;
             this.mountableTable.Location = new System.Drawing.Point(6, 22);
             this.mountableTable.MultiSelect = false;
             this.mountableTable.Name = "mountableTable";
@@ -88,7 +85,6 @@
             this.mountableTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.mountableTable.Size = new System.Drawing.Size(600, 292);
             this.mountableTable.TabIndex = 0;
-            this.mountableTable.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.mountableTable_CellMouseDown);
             this.mountableTable.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.mountableTable_CellValueChanged);
             this.mountableTable.CurrentCellDirtyStateChanged += new System.EventHandler(this.mountableTable_CurrentCellDirtyStateChanged);
             // 
@@ -161,19 +157,6 @@
             this.clmnAutoMount.Name = "clmnAutoMount";
             this.clmnAutoMount.Width = 70;
             // 
-            // menuGrid
-            // 
-            this.menuGrid.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mountToolStripMenuItem});
-            this.menuGrid.Name = "menuGrid";
-            this.menuGrid.Size = new System.Drawing.Size(111, 26);
-            // 
-            // mountToolStripMenuItem
-            // 
-            this.mountToolStripMenuItem.Name = "mountToolStripMenuItem";
-            this.mountToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
-            this.mountToolStripMenuItem.Text = "Mount";
-            // 
             // menuMain
             // 
             this.menuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -187,47 +170,63 @@
             // gayToolStripMenuItem
             // 
             this.gayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mountAllMenuItem,
+            this.unmountAllMenuItem,
             this.setPathMenuItem,
             this.autorunOnBootToolStripMenuItem,
-            this.minimizeToTrayToolStripMenuItem,
             this.saveToolStripMenuItem,
+            this.minimizeToTrayToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.gayToolStripMenuItem.Name = "gayToolStripMenuItem";
             this.gayToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.gayToolStripMenuItem.Text = "Options";
             // 
+            // mountAllMenuItem
+            // 
+            this.mountAllMenuItem.Name = "mountAllMenuItem";
+            this.mountAllMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.mountAllMenuItem.Text = "Mount All";
+            this.mountAllMenuItem.Click += new System.EventHandler(this.mountAllMenuItem_Click);
+            // 
+            // unmountAllMenuItem
+            // 
+            this.unmountAllMenuItem.Name = "unmountAllMenuItem";
+            this.unmountAllMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.unmountAllMenuItem.Text = "Unmount All";
+            this.unmountAllMenuItem.Click += new System.EventHandler(this.unmountAllMenuItem_Click);
+            // 
             // setPathMenuItem
             // 
             this.setPathMenuItem.Name = "setPathMenuItem";
-            this.setPathMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.setPathMenuItem.Size = new System.Drawing.Size(160, 22);
             this.setPathMenuItem.Text = "Set rclone path";
             this.setPathMenuItem.Click += new System.EventHandler(this.setPathMenuItem_Click);
             // 
             // autorunOnBootToolStripMenuItem
             // 
             this.autorunOnBootToolStripMenuItem.Name = "autorunOnBootToolStripMenuItem";
-            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.autorunOnBootToolStripMenuItem.Text = "Autostart";
             this.autorunOnBootToolStripMenuItem.Click += new System.EventHandler(this.autorunOnBootToolStripMenuItem_Click);
-            // 
-            // minimizeToTrayToolStripMenuItem
-            // 
-            this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
-            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
-            this.minimizeToTrayToolStripMenuItem.Click += new System.EventHandler(this.minimizeToTrayToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // minimizeToTrayToolStripMenuItem
+            // 
+            this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
+            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
+            this.minimizeToTrayToolStripMenuItem.Click += new System.EventHandler(this.minimizeToTrayToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -246,7 +245,6 @@
             this.Text = "ezRclone Manager";
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mountableTable)).EndInit();
-            this.menuGrid.ResumeLayout(false);
             this.menuMain.ResumeLayout(false);
             this.menuMain.PerformLayout();
             this.ResumeLayout(false);
@@ -265,13 +263,13 @@
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem saveToolStripMenuItem;
-        private ContextMenuStrip menuGrid;
-        private ToolStripMenuItem mountToolStripMenuItem;
         private DataGridViewTextBoxColumn clmnRemote;
         private DataGridViewTextBoxColumn clmnPath;
         private DataGridViewComboBoxColumn clmnDrive;
         private DataGridViewTextBoxColumn clmnName;
         private DataGridViewCheckBoxColumn clmnNetworkDrive;
         private DataGridViewCheckBoxColumn clmnAutoMount;
+        private ToolStripMenuItem mountAllMenuItem;
+        private ToolStripMenuItem unmountAllMenuItem;
     }
 }

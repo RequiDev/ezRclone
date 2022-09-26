@@ -109,24 +109,6 @@ namespace ezRclone
             }
         }
 
-        private void mountableTable_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.ColumnIndex == -1 || e.RowIndex == -1 || e.Button != MouseButtons.Right)
-                return;
-            
-            var c = (sender as DataGridView)?[e.ColumnIndex, e.RowIndex];
-            if (c == null || c.Selected)
-                return;
-            
-            if (c.DataGridView != null)
-            {
-                c.DataGridView.ClearSelection();
-                c.DataGridView.CurrentCell = c;
-            }
-
-            c.Selected = true;
-        }
-
         private void setPathMenuItem_Click(object sender, EventArgs e)
         {
             var dlg = new FolderBrowserDialog();
@@ -144,6 +126,16 @@ namespace ezRclone
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _rclone.Exit(sender, e);
+        }
+
+        private void mountAllMenuItem_Click(object sender, EventArgs e)
+        {
+            _rclone.MountAll();
+        }
+
+        private void unmountAllMenuItem_Click(object sender, EventArgs e)
+        {
+            _rclone.UnmountAll();
         }
     }
 }
