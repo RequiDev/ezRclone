@@ -14,7 +14,14 @@ namespace ezRclone
             _rclone = rclone;
             InitializeComponent();
 
-            autorunOnBootToolStripMenuItem.Checked = _rkRun.GetValue("ezRclone") != null;
+            var rkRunValue = _rkRun.GetValue("ezRclone");
+            autorunOnBootToolStripMenuItem.Checked = rkRunValue != null;
+
+            if (rkRunValue != null)
+            {
+                bool containsHidden = rkRunValue.ToString()!.Contains("--hidden");
+                hiddenToolStripMenuItem.Checked = containsHidden;
+            }
 
             // iterate all drive letters and add them to the list
             //for (var c = 'A'; c <= 'Z'; c++)
@@ -32,6 +39,11 @@ namespace ezRclone
             {
                 mountableTable.Rows.Add(mountable.Remote, mountable.Path, mountable.DriveLetter, mountable.Name, mountable.NetworkDrive, mountable.AutoMount);
             }
+        }
+
+        public bool ShouldHide()
+        {
+            return hiddenToolStripMenuItem.Checked;
         }
 
         private void mountableTable_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -101,11 +113,30 @@ namespace ezRclone
 
             if (autorunOnBootToolStripMenuItem.Checked)
             {
-                _rkRun.SetValue("ezRclone", Application.ExecutablePath);
+                _rkRun.SetValue("ezRclone", (hiddenToolStripMenuItem.Checked ? Application.ExecutablePath + " --hidden" : Application.ExecutablePath));
             }
             else
             {
                 _rkRun.DeleteValue("ezRclone", false);
+            }
+        }
+
+        private void hiddenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            hiddenToolStripMenuItem.Checked = !hiddenToolStripMenuItem.Checked;
+
+            if (autorunOnBootToolStripMenuItem.Checked)
+            {
+                if (hiddenToolStripMenuItem.Checked)
+                {
+                    _rkRun.DeleteValue("ezRclone", false);
+                    _rkRun.SetValue("ezRclone", Application.ExecutablePath + " --hidden");
+                }
+                else
+                {
+                    _rkRun.DeleteValue("ezRclone", false);
+                    _rkRun.SetValue("ezRclone", Application.ExecutablePath);
+                }
             }
         }
 
