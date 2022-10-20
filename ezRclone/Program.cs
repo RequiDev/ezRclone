@@ -126,6 +126,9 @@ namespace ezRclone
                 }
             }
 
+            contextMenu.Items.Add("Mount All", null, (_, _) => MountAll());
+            contextMenu.Items.Add("Unmount All", null, (_, _) => UnmountAll());
+
             contextMenu.Items.Add("Exit", null, Exit);
             _trayIcon = new NotifyIcon
             {
