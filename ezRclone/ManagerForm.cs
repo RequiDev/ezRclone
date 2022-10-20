@@ -113,7 +113,8 @@ namespace ezRclone
 
             if (autorunOnBootToolStripMenuItem.Checked)
             {
-                _rkRun.SetValue("ezRclone", (hiddenToolStripMenuItem.Checked ? Application.ExecutablePath + " --hidden" : Application.ExecutablePath));
+                string safePath = $"\"{Application.ExecutablePath}\"";
+                _rkRun.SetValue("ezRclone", $"{(hiddenToolStripMenuItem.Checked ? safePath + " --hidden" : safePath)}");
             }
             else
             {
@@ -130,12 +131,12 @@ namespace ezRclone
                 if (hiddenToolStripMenuItem.Checked)
                 {
                     _rkRun.DeleteValue("ezRclone", false);
-                    _rkRun.SetValue("ezRclone", Application.ExecutablePath + " --hidden");
+                    _rkRun.SetValue("ezRclone", $"\"{Application.ExecutablePath}\" --hidden");
                 }
                 else
                 {
                     _rkRun.DeleteValue("ezRclone", false);
-                    _rkRun.SetValue("ezRclone", Application.ExecutablePath);
+                    _rkRun.SetValue("ezRclone", $"\"{Application.ExecutablePath}\"");
                 }
             }
         }
