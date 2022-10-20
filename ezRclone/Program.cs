@@ -143,6 +143,10 @@ namespace ezRclone
             if (_managerForm == null || _managerForm.IsDisposed)
             {
                 _managerForm = new ManagerForm(this, _settings.Mountables);
+                if (_managerForm.ShouldHide())
+                {
+                    return;
+                }
             }
 
             _managerForm.Show();

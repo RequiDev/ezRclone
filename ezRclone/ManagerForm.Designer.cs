@@ -43,6 +43,7 @@
             this.unmountAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setPathMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autorunOnBootToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.minimizeToTrayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -184,49 +185,58 @@
             // mountAllMenuItem
             // 
             this.mountAllMenuItem.Name = "mountAllMenuItem";
-            this.mountAllMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.mountAllMenuItem.Size = new System.Drawing.Size(180, 22);
             this.mountAllMenuItem.Text = "Mount All";
             this.mountAllMenuItem.Click += new System.EventHandler(this.mountAllMenuItem_Click);
             // 
             // unmountAllMenuItem
             // 
             this.unmountAllMenuItem.Name = "unmountAllMenuItem";
-            this.unmountAllMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.unmountAllMenuItem.Size = new System.Drawing.Size(180, 22);
             this.unmountAllMenuItem.Text = "Unmount All";
             this.unmountAllMenuItem.Click += new System.EventHandler(this.unmountAllMenuItem_Click);
             // 
             // setPathMenuItem
             // 
             this.setPathMenuItem.Name = "setPathMenuItem";
-            this.setPathMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.setPathMenuItem.Size = new System.Drawing.Size(180, 22);
             this.setPathMenuItem.Text = "Set rclone path";
             this.setPathMenuItem.Click += new System.EventHandler(this.setPathMenuItem_Click);
             // 
             // autorunOnBootToolStripMenuItem
             // 
+            this.autorunOnBootToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.hiddenToolStripMenuItem});
             this.autorunOnBootToolStripMenuItem.Name = "autorunOnBootToolStripMenuItem";
-            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.autorunOnBootToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autorunOnBootToolStripMenuItem.Text = "Autostart";
             this.autorunOnBootToolStripMenuItem.Click += new System.EventHandler(this.autorunOnBootToolStripMenuItem_Click);
+            // 
+            // hiddenToolStripMenuItem
+            // 
+            this.hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
+            this.hiddenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.hiddenToolStripMenuItem.Text = "Hidden";
+            this.hiddenToolStripMenuItem.Click += new System.EventHandler(this.hiddenToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // minimizeToTrayToolStripMenuItem
             // 
             this.minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
-            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.minimizeToTrayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.minimizeToTrayToolStripMenuItem.Text = "Minimize to tray";
             this.minimizeToTrayToolStripMenuItem.Click += new System.EventHandler(this.minimizeToTrayToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -271,5 +281,6 @@
         private DataGridViewCheckBoxColumn clmnAutoMount;
         private ToolStripMenuItem mountAllMenuItem;
         private ToolStripMenuItem unmountAllMenuItem;
+        private ToolStripMenuItem hiddenToolStripMenuItem;
     }
 }
