@@ -174,7 +174,7 @@ namespace ezRclone
 
         public void Unmount(Mountable mountable)
         {
-            Process.GetProcessById(_mounts[mountable.Remote]).Kill(true);
+			Process.GetProcessById(_mounts[mountable.Remote]).Kill(true);
             _mounts.Remove(mountable.Remote);
         }
 
@@ -201,6 +201,11 @@ namespace ezRclone
             if (p == null)
             {
                 return;
+            }
+
+            if (p.WaitForExit(1000))
+            {
+	            return;
             }
 
             p.Exited += (_, _) =>
