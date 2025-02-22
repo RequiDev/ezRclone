@@ -23,7 +23,7 @@ namespace ezRclone
 
     public class ezRclone : ApplicationContext
     {
-        private static Settings _settings = new();
+        private readonly Settings _settings = new();
         private readonly Dictionary<string, int> _mounts = new();
 
         private readonly NotifyIcon _trayIcon;
