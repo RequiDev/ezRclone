@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using Tomlyn;
@@ -24,8 +23,8 @@ namespace ezRclone
 
     public class ezRclone : ApplicationContext
     {
-        private readonly Settings _settings = new Settings();
-        private readonly Dictionary<string, int> _mounts = new Dictionary<string, int>();
+        private static Settings _settings = new();
+        private readonly Dictionary<string, int> _mounts = new();
 
         private readonly NotifyIcon _trayIcon;
         private ManagerForm? _managerForm;
@@ -60,7 +59,7 @@ namespace ezRclone
                     var arguments = p.GetCommandLine();
                     if (arguments.Contains(mountable.Remote) && arguments.Contains("mount"))
                     {
-                        _mounts.Add(mountable.Remote, p.Id);
+                        _mounts.Add(mountable.Remote + Guid.NewGuid(), p.Id);
 
                         p.Exited += (_, _) =>
                         {

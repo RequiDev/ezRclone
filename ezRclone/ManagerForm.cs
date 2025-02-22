@@ -39,6 +39,7 @@ namespace ezRclone
             {
                 mountableTable.Rows.Add(mountable.Remote, mountable.Path, mountable.DriveLetter, mountable.Name, mountable.NetworkDrive, mountable.AutoMount);
             }
+            hiddenToolStripMenuItem.Enabled = autorunOnBootToolStripMenuItem.Checked;
         }
 
         public bool ShouldHide()
@@ -113,11 +114,13 @@ namespace ezRclone
 
             if (autorunOnBootToolStripMenuItem.Checked)
             {
+                hiddenToolStripMenuItem.Enabled = true;
                 string safePath = $"\"{Application.ExecutablePath}\"";
                 _rkRun.SetValue("ezRclone", $"{(hiddenToolStripMenuItem.Checked ? safePath + " --hidden" : safePath)}");
             }
             else
             {
+                hiddenToolStripMenuItem.Enabled = false;
                 _rkRun.DeleteValue("ezRclone", false);
             }
         }
@@ -168,6 +171,10 @@ namespace ezRclone
         private void unmountAllMenuItem_Click(object sender, EventArgs e)
         {
             _rclone.UnmountAll();
+        }
+        
+        private void ManagerForm_Load(object sender, EventArgs e)
+        {
         }
     }
 }
