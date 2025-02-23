@@ -30,7 +30,7 @@ jobs:
       run:  dotnet publish -r win-x64 -c ${{ matrix.configuration }} -p:PublishSingleFile=true --self-contained false
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Artifacts-${{ matrix.configuration }}
         path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
