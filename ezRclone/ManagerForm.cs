@@ -172,9 +172,6 @@ namespace ezRclone
         {
             _rclone.UnmountAll();
         }
-        
-        private void ManagerForm_Load(object sender, EventArgs e)
-        {
-        }
+       
     }
 }

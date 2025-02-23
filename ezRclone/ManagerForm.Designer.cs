@@ -210,7 +210,6 @@
             MainMenuStrip = menuMain;
             MaximizeBox = false;
             Text = "ezRclone Manager";
-            Load += ManagerForm_Load;
             groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)mountableTable).EndInit();
             menuMain.ResumeLayout(false);
