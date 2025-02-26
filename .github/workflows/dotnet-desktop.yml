@@ -24,7 +24,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 9.0.x
       
     - name: Build
       run:  dotnet publish -r win-x64 -c ${{ matrix.configuration }} -p:PublishSingleFile=true --self-contained false
@@ -33,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Artifacts-${{ matrix.configuration }}
-        path: ezRclone\bin\${{ matrix.configuration }}\net6.0-windows\win-x64\publish
+        path: ezRclone\bin\${{ matrix.configuration }}\net9.0-windows\win-x64\publish
       
     - name: Bump version and push tag
       if: github.ref_name == 'master' && matrix.configuration == 'Release'
