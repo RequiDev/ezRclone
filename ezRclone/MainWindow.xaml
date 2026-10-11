@@ -187,6 +187,50 @@
                 </Grid>
             </TabItem>
 
+            <TabItem Header="Log">
+                <DockPanel Margin="0,12,0,0">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button Content="Copy" Command="{Binding CopyLogCommand}" Margin="0,0,8,0" />
+                        <Button Content="Clear" Command="{Binding ClearLogCommand}" />
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}" Margin="0,0,0,8"
+                               Text="Output of rclone and mount events, newest first." />
+                    <ListBox ItemsSource="{Binding Log}"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:LogEntry}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" Opacity="0.7"
+                                               FontFamily="Cascadia Mono, Consolas" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Remote}" FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Message}" TextWrapping="Wrap"
+                                               FontFamily="Cascadia Mono, Consolas">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                        <Setter Property="Foreground" Value="#E5484D" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
             <TabItem Header="Settings">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel MaxWidth="680" HorizontalAlignment="Left" Margin="0,4,12,12">

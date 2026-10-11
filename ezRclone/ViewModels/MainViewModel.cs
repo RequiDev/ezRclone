@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ezRclone.Core;
@@ -9,6 +10,8 @@ namespace ezRclone.ViewModels;
 
 public sealed class MainViewModel : ObservableObject
 {
+    private const int MaxLogEntries = 1000;
+
     private readonly SettingsStore _store;
     private readonly Settings _settings;
     private readonly MountManager _mountManager;
@@ -29,6 +32,8 @@ public sealed class MainViewModel : ObservableObject
 
         _mountManager.RcloneDirectory = _settings.RclonePath;
         _mountManager.StateChanged += (_, state) => dispatcher.BeginInvoke(() => OnStateChanged(state));
+        _mountManager.OutputReceived += (_, e) => dispatcher.BeginInvoke(() =>
+            AddLog(new LogEntry(e.Timestamp, e.Remote, e.Line, e.Line.Contains("ERROR") || e.Line.Contains("CRITICAL"))));
 
         foreach (var mountable in _settings.Mountables)
             Remotes.Add(new RemoteViewModel(mountable, mountManager, Save));
@@ -45,6 +50,10 @@ public sealed class MainViewModel : ObservableObject
         BrowseRclonePathCommand = new RelayCommand(BrowseRclonePath);
         RemoveRemoteCommand = new RelayCommand(RemoveSelectedRemote,
             () => SelectedRemote is { IsMissing: true, IsActive: false });
+        ClearLogCommand = new RelayCommand(Log.Clear, () => Log.Count > 0);
+        CopyLogCommand = new RelayCommand(
+            () => Clipboard.SetText(string.Join(Environment.NewLine, Log.Reverse().Select(entry => entry.ToString()))),
+            () => Log.Count > 0);
     }
 
     public ObservableCollection<RemoteViewModel> Remotes { get; } = new();
@@ -54,6 +63,11 @@ public sealed class MainViewModel : ObservableObject
         get => _selectedRemote;
         set => SetProperty(ref _selectedRemote, value);
     }
+
+    /// <summary>
+    /// rclone output and mount events, newest first.
+    /// </summary>
+    public ObservableCollection<LogEntry> Log { get; } = new();
 
     public bool HasRemotes => Remotes.Count > 0;
 
@@ -129,6 +143,8 @@ public sealed class MainViewModel : ObservableObject
     public ICommand RefreshRemotesCommand { get; }
     public ICommand BrowseRclonePathCommand { get; }
     public ICommand RemoveRemoteCommand { get; }
+    public ICommand ClearLogCommand { get; }
+    public ICommand CopyLogCommand { get; }
 
     /// <summary>
     /// Loads the remotes from rclone, takes over mounts that survived a restart and mounts the auto-mount remotes.
@@ -228,8 +244,30 @@ public sealed class MainViewModel : ObservableObject
 
     private void OnStateChanged(MountState state)
     {
-        Remotes.FirstOrDefault(r => r.Remote == state.Remote)?.Apply(state);
+        var remote = Remotes.FirstOrDefault(r => r.Remote == state.Remote);
+        remote?.Apply(state);
         OnPropertyChanged(nameof(Summary));
+
+        var message = state.Status switch
+        {
+            MountStatus.Mounted => remote?.StatusText ?? "Mounted",
+            MountStatus.Unmounted => "Unmounted",
+            MountStatus.Failed => "Mount failed",
+            _ => null
+        };
+        if (message != null)
+        {
+            if (!string.IsNullOrEmpty(state.Message))
+                message += $": {state.Message}";
+            AddLog(new LogEntry(DateTime.Now, state.Remote, message, state.Status == MountStatus.Failed));
+        }
+    }
+
+    private void AddLog(LogEntry entry)
+    {
+        Log.Insert(0, entry);
+        while (Log.Count > MaxLogEntries)
+            Log.RemoveAt(Log.Count - 1);
     }
 
     private void Save() => _store.Save(_settings);

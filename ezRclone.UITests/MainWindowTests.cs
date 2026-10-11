@@ -66,6 +66,13 @@ public class MainWindowTests
         window.Show();
         window.UpdateLayout();
 
+        // Without a drive letter this fails right away, which fills the failure message and the log.
+        var failedRemote = viewModel.Remotes.Single(r => r.Remote == "nas");
+        Assert.True(failedRemote.MountAsync().IsCompleted);
+        DoEvents();
+        Assert.Equal(MountStatus.Failed, failedRemote.Status);
+        Assert.NotEmpty(viewModel.Log);
+
         var tabs = FindChild<TabControl>(window) ?? throw new InvalidOperationException("No TabControl found.");
         foreach (var remote in viewModel.Remotes)
         {
