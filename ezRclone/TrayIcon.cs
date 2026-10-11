@@ -29,7 +29,7 @@ public sealed class TrayIcon : IDisposable
         };
         BuildMenu();
 
-        using var iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/rclone.ico"))!.Stream;
+        using var iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/ezRclone;component/rclone.ico"))!.Stream;
         _notifyIcon = new Forms.NotifyIcon
         {
             Icon = new System.Drawing.Icon(iconStream),

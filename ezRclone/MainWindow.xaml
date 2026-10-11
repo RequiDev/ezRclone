@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:MainViewModel}"
         Title="ezRclone"
-        Icon="/rclone.ico"
+        Icon="pack://application:,,,/ezRclone;component/rclone.ico"
         Width="1000" Height="640"
         MinWidth="780" MinHeight="480"
         WindowStartupLocation="CenterScreen">
