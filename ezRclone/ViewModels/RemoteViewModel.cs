@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ezRclone.Core;
@@ -26,6 +27,7 @@ public sealed class RemoteViewModel : ObservableObject
         UnmountCommand = new AsyncRelayCommand(UnmountAsync, () => IsActive);
         ToggleCommand = new AsyncRelayCommand(() => IsActive ? UnmountAsync() : MountAsync(),
             () => Status is not (MountStatus.Mounting or MountStatus.Unmounting));
+        OpenCommand = new RelayCommand(Open, () => Status == MountStatus.Mounted);
     }
 
     public Mountable Mountable { get; }
@@ -154,10 +156,17 @@ public sealed class RemoteViewModel : ObservableObject
     public ICommand MountCommand { get; }
     public ICommand UnmountCommand { get; }
     public ICommand ToggleCommand { get; }
+    public ICommand OpenCommand { get; }
 
     public Task MountAsync() => _mountManager.MountAsync(Mountable);
 
     public Task UnmountAsync() => _mountManager.UnmountAsync(Remote);
+
+    private void Open()
+    {
+        if (DriveLetters.Normalize(Mountable.DriveLetter) != null)
+            Process.Start(new ProcessStartInfo("explorer.exe", DriveLetters.Root(Mountable.DriveLetter)) { UseShellExecute = true });
+    }
 
     public void RefreshDriveLetters()
     {

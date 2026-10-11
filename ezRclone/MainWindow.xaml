@@ -80,8 +80,12 @@
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                     <StackPanel Margin="0,0,12,12">
                                         <DockPanel>
-                                            <Button DockPanel.Dock="Right" VerticalAlignment="Top" MinWidth="120"
-                                                    Content="{Binding ToggleText}" Command="{Binding ToggleCommand}" />
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                                                <Button Content="Open in Explorer" Command="{Binding OpenCommand}"
+                                                        Margin="0,0,8,0" />
+                                                <Button MinWidth="120" Content="{Binding ToggleText}"
+                                                        Command="{Binding ToggleCommand}" />
+                                            </StackPanel>
                                             <StackPanel>
                                                 <TextBlock Text="{Binding DisplayName}" FontSize="22" FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis" />
