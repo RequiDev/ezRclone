@@ -16,7 +16,7 @@ public sealed class TrayIcon : IDisposable
     private readonly Forms.NotifyIcon _notifyIcon;
     private readonly Forms.ContextMenuStrip _menu = new();
 
-    public TrayIcon(MainViewModel viewModel, Action showWindow, Action exit)
+    public TrayIcon(MainViewModel viewModel, Action showWindow, Action exit, Func<bool> shouldNotify)
     {
         _viewModel = viewModel;
         _showWindow = showWindow;
@@ -41,6 +41,17 @@ public sealed class TrayIcon : IDisposable
         {
             if (e.Button == Forms.MouseButtons.Left)
                 _showWindow();
+        };
+        _notifyIcon.BalloonTipClicked += (_, _) => _showWindow();
+
+        _viewModel.MountFailed += (_, state) =>
+        {
+            if (!shouldNotify())
+                return;
+
+            var remote = _viewModel.Remotes.FirstOrDefault(r => r.Remote == state.Remote);
+            _notifyIcon.ShowBalloonTip(5000, $"{remote?.DisplayName ?? state.Remote} is not mounted",
+                state.Message ?? "rclone stopped.", Forms.ToolTipIcon.Error);
         };
     }
 

@@ -36,7 +36,9 @@ public partial class App
 
         _viewModel = new MainViewModel(new SettingsStore(SettingsStore.DefaultDirectory), new MountManager(),
             new RegistryAutostart(), Dispatcher);
-        _trayIcon = new TrayIcon(_viewModel, ShowMainWindow, ExitApplication);
+        // Failures are visible in the window already, only notify when it is not in front.
+        _trayIcon = new TrayIcon(_viewModel, ShowMainWindow, ExitApplication,
+            () => _window is not { IsVisible: true, IsActive: true });
 
         if (!startHidden)
             ShowMainWindow();

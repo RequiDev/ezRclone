@@ -56,6 +56,11 @@ public sealed class MainViewModel : ObservableObject
             () => Log.Count > 0);
     }
 
+    /// <summary>
+    /// Raised on the UI thread when a mount fails to start or rclone exits on its own.
+    /// </summary>
+    public event EventHandler<MountState>? MountFailed;
+
     public ObservableCollection<RemoteViewModel> Remotes { get; } = new();
 
     public RemoteViewModel? SelectedRemote
@@ -261,6 +266,9 @@ public sealed class MainViewModel : ObservableObject
                 message += $": {state.Message}";
             AddLog(new LogEntry(DateTime.Now, state.Remote, message, state.Status == MountStatus.Failed));
         }
+
+        if (state.Status == MountStatus.Failed)
+            MountFailed?.Invoke(this, state);
     }
 
     private void AddLog(LogEntry entry)
