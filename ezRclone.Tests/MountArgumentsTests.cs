@@ -52,4 +52,16 @@ public class MountArgumentsTests
     {
         Assert.Equal(expected, MountArguments.Split(input));
     }
+
+    [Theory]
+    [InlineData("\"C:\\rclone\\rclone.exe\" mount gdrive: G: --vfs-cache-mode writes", "gdrive")]
+    [InlineData("rclone.exe mount \"my nas:media\" M:", "my nas")]
+    [InlineData("rclone.exe mount bar:\"\" B:", "bar")]
+    [InlineData("rclone.exe mount gdrive2: H:", null)]
+    [InlineData("rclone.exe serve http gdrive:", null)]
+    [InlineData("rclone.exe sync nas: gdrive:backup", null)]
+    public void FindMountedRemote_MatchesExactRemoteNames(string commandLine, string? expected)
+    {
+        Assert.Equal(expected, MountArguments.FindMountedRemote(commandLine, ["gdrive", "bar", "my nas", "nas"]));
+    }
 }

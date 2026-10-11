@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ezRclone.Core;
 
@@ -28,6 +29,21 @@ public static class MountArguments
 
         arguments.AddRange(Split(mountable.ExtraArguments));
         return arguments;
+    }
+
+    /// <summary>
+    /// Finds which of <paramref name="remotes"/> an existing <c>rclone mount</c> command line serves, or null when it is
+    /// not a mount of any of them. Longer names win so <c>foo bar</c> is not mistaken for <c>bar</c>.
+    /// </summary>
+    public static string? FindMountedRemote(string commandLine, IEnumerable<string> remotes)
+    {
+        if (!Regex.IsMatch(commandLine, @"\smount\s"))
+            return null;
+
+        return remotes
+            .Where(remote => !string.IsNullOrEmpty(remote))
+            .OrderByDescending(remote => remote.Length)
+            .FirstOrDefault(remote => Regex.IsMatch(commandLine, $@"(^|[\s""]){Regex.Escape(remote)}:"));
     }
 
     /// <summary>
