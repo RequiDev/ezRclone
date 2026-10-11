@@ -120,6 +120,20 @@ public sealed class MainViewModel : ObservableObject
         private set => SetProperty(ref _isRefreshing, value);
     }
 
+    public bool UnmountOnExit
+    {
+        get => _settings.UnmountOnExit;
+        set
+        {
+            if (_settings.UnmountOnExit == value)
+                return;
+
+            _settings.UnmountOnExit = value;
+            Save();
+            OnPropertyChanged();
+        }
+    }
+
     public bool StartWithWindows
     {
         get => _autostart.IsEnabled;

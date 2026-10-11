@@ -68,9 +68,16 @@ public partial class App
         _window.Activate();
     }
 
-    public void ExitApplication()
+    public async void ExitApplication()
     {
+        if (_isExiting)
+            return;
+
         _isExiting = true;
+        _window?.Hide();
+        if (_viewModel is { UnmountOnExit: true })
+            await _viewModel.UnmountAllAsync();
+
         _trayIcon?.Dispose();
         _window?.Close();
         _singleInstance?.Dispose();

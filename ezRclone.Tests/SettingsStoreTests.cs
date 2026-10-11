@@ -24,11 +24,13 @@ public class SettingsStoreTests
         store.Save(new Settings
         {
             RclonePath = @"C:\rclone",
+            UnmountOnExit = true,
             Mountables = { new Mountable { Remote = "gdrive", DriveLetter = "G", VfsCacheMode = "full", AutoMount = true } }
         });
         var loaded = store.Load();
 
         Assert.Equal(@"C:\rclone", loaded.RclonePath);
+        Assert.True(loaded.UnmountOnExit);
         var mountable = Assert.Single(loaded.Mountables);
         Assert.Equal("gdrive", mountable.Remote);
         Assert.Equal("G", mountable.DriveLetter);

@@ -248,6 +248,11 @@
                         </DockPanel>
                         <TextBlock Text="{Binding RcloneStatus}" Margin="0,6,0,0" Style="{StaticResource Hint}" />
 
+                        <TextBlock Text="Mounts" Style="{StaticResource SectionHeader}" />
+                        <CheckBox Content="Unmount all remotes when ezRclone exits" IsChecked="{Binding UnmountOnExit}" />
+                        <TextBlock Style="{StaticResource Hint}" Margin="28,4,0,0"
+                                   Text="When off, mounts keep running after exit and ezRclone picks them up again on its next start." />
+
                         <TextBlock Text="Startup" Style="{StaticResource SectionHeader}" />
                         <CheckBox Content="Start ezRclone when I sign in to Windows" IsChecked="{Binding StartWithWindows}" />
                         <CheckBox Content="Start minimized to the tray" Margin="28,6,0,0"
