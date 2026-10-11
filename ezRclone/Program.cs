@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Tomlyn;
 
@@ -54,17 +55,24 @@ namespace ezRclone
             var rcloneProcesses = Process.GetProcessesByName("rclone");
             foreach (var p in rcloneProcesses)
             {
+                var arguments = p.GetCommandLine();
+                if (!arguments.Contains(" mount "))
+                    continue;
+
                 foreach (var mountable in _settings.Mountables)
                 {
-                    var arguments = p.GetCommandLine();
-                    if (arguments.Contains(mountable.Remote) && arguments.Contains("mount"))
+                    if (IsMounted(mountable))
+                        continue;
+
+                    if (Regex.IsMatch(arguments, $@"(^|[\s""]){Regex.Escape(mountable.Remote)}:"))
                     {
-                        _mounts.Add(mountable.Remote + Guid.NewGuid(), p.Id);
+                        _mounts.Add(mountable.Remote, p.Id);
 
                         p.Exited += (_, _) =>
                         {
                             _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
                         };
+                        break;
                     }
                 }
             }
