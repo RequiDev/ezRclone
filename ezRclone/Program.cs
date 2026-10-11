@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -217,7 +218,18 @@ namespace ezRclone
 
             psi.Arguments += " --vfs-cache-mode writes";
 
-            var p = Process.Start(psi);
+            Process? p;
+            try
+            {
+                p = Process.Start(psi);
+            }
+            catch (Win32Exception e)
+            {
+                MessageBox.Show($"Failed to start rclone for {mountable.Remote}: {e.Message}\n\nCheck the rclone path in the manager.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (p == null)
             {
                 return;
