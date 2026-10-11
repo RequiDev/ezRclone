@@ -8,6 +8,7 @@ namespace ezRclone;
 
 public partial class App
 {
+    private SingleInstance? _singleInstance;
     private MainViewModel? _viewModel;
     private TrayIcon? _trayIcon;
     private MainWindow? _window;
@@ -18,11 +19,26 @@ public partial class App
         base.OnStartup(e);
         DispatcherUnhandledException += OnDispatcherUnhandledException;
 
+        var startHidden = e.Args.Contains(RegistryAutostart.HiddenArgument, StringComparer.OrdinalIgnoreCase);
+        _singleInstance = new SingleInstance();
+        if (!_singleInstance.IsFirstInstance)
+        {
+            // Starting ezRclone again brings up the running instance, unless it is the hidden autostart launch.
+            if (!startHidden)
+                _singleInstance.RequestShow();
+
+            _singleInstance.Dispose();
+            Shutdown();
+            return;
+        }
+
+        _singleInstance.ListenForShowRequests(() => Dispatcher.BeginInvoke(ShowMainWindow));
+
         _viewModel = new MainViewModel(new SettingsStore(SettingsStore.DefaultDirectory), new MountManager(),
             new RegistryAutostart(), Dispatcher);
         _trayIcon = new TrayIcon(_viewModel, ShowMainWindow, ExitApplication);
 
-        if (!e.Args.Contains(RegistryAutostart.HiddenArgument, StringComparer.OrdinalIgnoreCase))
+        if (!startHidden)
             ShowMainWindow();
 
         await _viewModel.InitializeAsync();
@@ -55,6 +71,7 @@ public partial class App
         _isExiting = true;
         _trayIcon?.Dispose();
         _window?.Close();
+        _singleInstance?.Dispose();
         Shutdown();
     }
 
