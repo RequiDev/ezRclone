@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@ namespace ezRclone
     public class ezRclone : ApplicationContext
     {
         private readonly Settings _settings = new();
-        private readonly Dictionary<string, int> _mounts = new();
+        private readonly ConcurrentDictionary<string, int> _mounts = new();
 
         private readonly NotifyIcon _trayIcon;
         private ManagerForm? _managerForm;
@@ -66,12 +67,7 @@ namespace ezRclone
 
                     if (Regex.IsMatch(arguments, $@"(^|[\s""]){Regex.Escape(mountable.Remote)}:"))
                     {
-                        _mounts.Add(mountable.Remote, p.Id);
-
-                        p.Exited += (_, _) =>
-                        {
-                            _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
-                        };
+                        TrackMount(mountable, p);
                         break;
                     }
                 }
@@ -182,7 +178,7 @@ namespace ezRclone
         public void Unmount(Mountable mountable)
         {
 			Process.GetProcessById(_mounts[mountable.Remote]).Kill(true);
-            _mounts.Remove(mountable.Remote);
+            _mounts.TryRemove(mountable.Remote, out _);
         }
 
         public void Mount(Mountable mountable)
@@ -215,12 +211,17 @@ namespace ezRclone
 	            return;
             }
 
-            p.Exited += (_, _) =>
-            {
-                _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
-            };
+            TrackMount(mountable, p);
+        }
 
-            _mounts[mountable.Remote] = p.Id;
+        private void TrackMount(Mountable mountable, Process p)
+        {
+            var mount = new KeyValuePair<string, int>(mountable.Remote, p.Id);
+            _mounts[mount.Key] = mount.Value;
+
+            // Only forget this exact process, the remote may have been remounted in the meantime.
+            p.Exited += (_, _) => _mounts.TryRemove(mount);
+            p.EnableRaisingEvents = true;
         }
 
         private string? _rcloneConfigPath;
