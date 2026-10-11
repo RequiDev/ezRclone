@@ -82,13 +82,6 @@ namespace ezRclone
 
                 void OnClick(object? sender, EventArgs args)
                 {
-                    if (string.IsNullOrEmpty(mountable.DriveLetter))
-                    {
-                        MessageBox.Show("Can't mount drive without a letter.", "Error", MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-                        return;
-                    }
-
                     if (sender is ToolStripMenuItem toolstripMenuItem)
                     {
                         if (IsMounted(mountable))
@@ -98,6 +91,13 @@ namespace ezRclone
                         }
                         else
                         {
+                            if (string.IsNullOrEmpty(mountable.DriveLetter))
+                            {
+                                MessageBox.Show("Can't mount drive without a letter.", "Error", MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                                return;
+                            }
+
                             Mount(mountable);
                             toolstripMenuItem.Text = "Unmount";
                         }
@@ -196,6 +196,9 @@ namespace ezRclone
 
         public void Mount(Mountable mountable)
         {
+            if (string.IsNullOrEmpty(mountable.DriveLetter))
+                return;
+
             var psi = new ProcessStartInfo(Path.Combine(_settings.RclonePath, "rclone.exe"), $"mount {mountable.Remote}:\"{mountable.Path}\" {mountable.DriveLetter}:")
             {
                 CreateNoWindow = true
