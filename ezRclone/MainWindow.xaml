@@ -1,0 +1,265 @@
+<Window x:Class="ezRclone.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ezRclone.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:MainViewModel}"
+        Title="ezRclone"
+        Icon="pack://application:,,,/ezRclone;component/rclone.ico"
+        Width="1000" Height="640"
+        MinWidth="780" MinHeight="480"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="20,16,20,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Mount all" Command="{Binding MountAllCommand}" Margin="0,0,8,0"
+                        ToolTip="Mount every remote that has a drive letter" />
+                <Button Content="Unmount all" Command="{Binding UnmountAllCommand}" Margin="0,0,8,0" />
+                <Button Content="Refresh remotes" Command="{Binding RefreshRemotesCommand}"
+                        ToolTip="Reload the list of remotes from rclone" />
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="ezRclone" FontSize="26" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Summary}" Style="{StaticResource Hint}" />
+            </StackPanel>
+        </DockPanel>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Remotes">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ListBox ItemsSource="{Binding Remotes}"
+                             SelectedItem="{Binding SelectedRemote}"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:RemoteViewModel}">
+                                <Grid Margin="2,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Width="10" Height="10" Margin="0,0,12,0" VerticalAlignment="Center"
+                                             Fill="{Binding Status, Converter={StaticResource StatusToBrush}}"
+                                             ToolTip="{Binding StatusText}" />
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Subtitle}" FontSize="12" Opacity="0.7"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock Grid.Column="0" Margin="16" Style="{StaticResource Hint}" TextAlignment="Center"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding HasRemotes, Converter={StaticResource InverseBooleanToVisibility}}"
+                               Text="No remotes yet. Create one with 'rclone config', then check the rclone path in Settings." />
+
+                    <TextBlock Grid.Column="1" Margin="24,0,0,0" Style="{StaticResource Hint}"
+                               Text="Select a remote to see its settings."
+                               Visibility="{Binding SelectedRemote, Converter={StaticResource NullToVisibility}}" />
+
+                    <ContentControl Grid.Column="1" Margin="24,0,0,0" Content="{Binding SelectedRemote}"
+                                    Focusable="False">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate DataType="{x:Type vm:RemoteViewModel}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <StackPanel Margin="0,0,12,12">
+                                        <DockPanel>
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                                                <Button Content="Open in Explorer" Command="{Binding OpenCommand}"
+                                                        Margin="0,0,8,0" />
+                                                <Button MinWidth="120" Content="{Binding ToggleText}"
+                                                        Command="{Binding ToggleCommand}" />
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="22" FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Style="{StaticResource Hint}">
+                                                    <Run Text="{Binding Remote, Mode=OneWay}" /><Run Text=":" />
+                                                    <Run Text="{Binding Type, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DockPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                            <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                     Fill="{Binding Status, Converter={StaticResource StatusToBrush}}" />
+                                            <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding StatusMessage}" Margin="18,4,0,0" TextWrapping="Wrap"
+                                                   Foreground="{Binding Status, Converter={StaticResource StatusToBrush}}"
+                                                   Visibility="{Binding HasStatusMessage, Converter={StaticResource BooleanToVisibility}}" />
+
+                                        <DockPanel Margin="0,12,0,0"
+                                                   Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibility}}">
+                                            <Button DockPanel.Dock="Right" Content="Remove"
+                                                    Command="{Binding DataContext.RemoveRemoteCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                            <TextBlock Style="{StaticResource Hint}" VerticalAlignment="Center"
+                                                       Text="rclone no longer has this remote in its config." />
+                                        </DockPanel>
+
+                                        <TextBlock Margin="0,12,0,0" Style="{StaticResource Hint}"
+                                                   Text="Unmount the remote to change its settings."
+                                                   Visibility="{Binding IsActive, Converter={StaticResource BooleanToVisibility}}" />
+
+                                        <Grid Margin="0,16,0,0" IsEnabled="{Binding IsEditable}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="Drive letter" Style="{StaticResource FieldLabel}" />
+                                            <ComboBox Grid.Row="0" Grid.Column="1" Width="100" HorizontalAlignment="Left"
+                                                      Margin="0,0,0,8"
+                                                      ItemsSource="{Binding AvailableDriveLetters}"
+                                                      SelectedItem="{Binding DriveLetter}"
+                                                      DropDownOpened="DriveLetter_DropDownOpened" />
+
+                                            <TextBlock Grid.Row="1" Text="Remote path" Style="{StaticResource FieldLabel}" />
+                                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"
+                                                     Text="{Binding Path}"
+                                                     ToolTip="Folder inside the remote to mount, empty for the whole remote" />
+
+                                            <TextBlock Grid.Row="2" Text="Volume name" Style="{StaticResource FieldLabel}" />
+                                            <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"
+                                                     Text="{Binding Name}"
+                                                     ToolTip="Name shown for the drive in Explorer" />
+
+                                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,4,0,0">
+                                                <CheckBox Content="Mount when ezRclone starts" IsChecked="{Binding AutoMount}" />
+                                                <CheckBox Content="Mount as network drive" IsChecked="{Binding NetworkDrive}"
+                                                          Margin="0,6,0,0" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Expander Header="Advanced" Margin="0,16,0,0" IsEnabled="{Binding IsEditable}">
+                                            <Grid Margin="0,8,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0" Text="VFS cache mode" Style="{StaticResource FieldLabel}" />
+                                                <ComboBox Grid.Row="0" Grid.Column="1" Width="140" HorizontalAlignment="Left"
+                                                          Margin="0,0,0,8"
+                                                          ItemsSource="{Binding VfsCacheModes}"
+                                                          SelectedItem="{Binding VfsCacheMode}" />
+
+                                                <TextBlock Grid.Row="1" Text="Extra flags" Style="{StaticResource FieldLabel}" />
+                                                <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"
+                                                         Text="{Binding ExtraArguments}"
+                                                         ToolTip="Additional rclone mount flags, e.g. --vfs-cache-max-size 10G" />
+
+                                                <TextBlock Grid.Row="2" Text="Command" Style="{StaticResource FieldLabel}"
+                                                           VerticalAlignment="Top" Margin="0,6,16,0" />
+                                                <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True" TextWrapping="Wrap"
+                                                         FontFamily="Cascadia Mono, Consolas"
+                                                         Text="{Binding CommandPreview, Mode=OneWay}" />
+                                            </Grid>
+                                        </Expander>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Log">
+                <DockPanel Margin="0,12,0,0">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button Content="Copy" Command="{Binding CopyLogCommand}" Margin="0,0,8,0" />
+                        <Button Content="Clear" Command="{Binding ClearLogCommand}" />
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}" Margin="0,0,0,8"
+                               Text="Output of rclone and mount events, newest first." />
+                    <ListBox ItemsSource="{Binding Log}"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:LogEntry}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" Opacity="0.7"
+                                               FontFamily="Cascadia Mono, Consolas" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Remote}" FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Message}" TextWrapping="Wrap"
+                                               FontFamily="Cascadia Mono, Consolas">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                        <Setter Property="Foreground" Value="#E5484D" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Settings">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left" Margin="0,4,12,12">
+                        <TextBlock Text="rclone" Style="{StaticResource SectionHeader}" />
+                        <TextBlock Style="{StaticResource Hint}"
+                                   Text="Folder that contains rclone.exe. Leave it empty to use rclone from your PATH." />
+                        <DockPanel Margin="0,8,0,0">
+                            <Button DockPanel.Dock="Right" Content="Browse…" Margin="8,0,0,0"
+                                    Command="{Binding BrowseRclonePathCommand}" />
+                            <TextBox Text="{Binding RclonePath}" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding RcloneStatus}" Margin="0,6,0,0" Style="{StaticResource Hint}" />
+
+                        <TextBlock Text="Mounts" Style="{StaticResource SectionHeader}" />
+                        <CheckBox Content="Unmount all remotes when ezRclone exits" IsChecked="{Binding UnmountOnExit}" />
+                        <TextBlock Style="{StaticResource Hint}" Margin="28,4,0,0"
+                                   Text="When off, mounts keep running after exit and ezRclone picks them up again on its next start." />
+
+                        <TextBlock Text="Startup" Style="{StaticResource SectionHeader}" />
+                        <CheckBox Content="Start ezRclone when I sign in to Windows" IsChecked="{Binding StartWithWindows}" />
+                        <CheckBox Content="Start minimized to the tray" Margin="28,6,0,0"
+                                  IsChecked="{Binding StartHidden}" IsEnabled="{Binding StartWithWindows}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

@@ -1,23 +1,36 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>True</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <StartupObject>ezRclone.Program</StartupObject>
+    <UseWPF>true</UseWPF>
+    <!-- Only used for the tray icon, WPF has no NotifyIcon of its own. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>rclone.ico</ApplicationIcon>
+    <!-- Allows building (not running) on Linux and macOS. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- The Fluent theme (ThemeMode) is marked experimental in .NET 9. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="rclone.ico" />
+    <!-- Keep WinForms types out of the global namespace, they clash with WPF's. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Management" Version="6.0.0" />
-    <PackageReference Include="Tomlyn" Version="0.15.0" />
+    <Resource Include="rclone.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ezRclone.Core\ezRclone.Core.csproj" />
   </ItemGroup>
 
 </Project>

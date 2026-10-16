@@ -2,13 +2,13 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "master", "actions-test", "dev" ]
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
   pull_request:
     branches: [ "master" ]
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,29 +19,32 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-      
+
+    - name: Test
+      run: dotnet test ezRclone.sln -c ${{ matrix.configuration }}
+
     - name: Build
-      run:  dotnet publish -r win-x64 -c ${{ matrix.configuration }} -p:PublishSingleFile=true --self-contained false
-        
+      run: dotnet publish ezRclone/ezRclone.csproj -r win-x64 -c ${{ matrix.configuration }} -p:PublishSingleFile=true --self-contained false
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Artifacts-${{ matrix.configuration }}
         path: ezRclone\bin\${{ matrix.configuration }}\net9.0-windows\win-x64\publish
-      
+
     - name: Bump version and push tag
       if: github.ref_name == 'master' && matrix.configuration == 'Release'
       id: tag_version
       uses: mathieudutour/github-tag-action@v6.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-      
+
     - name: Publish a release
       if: github.ref_name == 'master' && matrix.configuration == 'Release'
       uses: ncipollo/release-action@v1
