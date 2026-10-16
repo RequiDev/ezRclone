@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Tomlyn;
 
@@ -24,7 +27,7 @@ namespace ezRclone
     public class ezRclone : ApplicationContext
     {
         private readonly Settings _settings = new();
-        private readonly Dictionary<string, int> _mounts = new();
+        private readonly ConcurrentDictionary<string, int> _mounts = new();
 
         private readonly NotifyIcon _trayIcon;
         private ManagerForm? _managerForm;
@@ -54,17 +57,19 @@ namespace ezRclone
             var rcloneProcesses = Process.GetProcessesByName("rclone");
             foreach (var p in rcloneProcesses)
             {
+                var arguments = p.GetCommandLine();
+                if (!arguments.Contains(" mount "))
+                    continue;
+
                 foreach (var mountable in _settings.Mountables)
                 {
-                    var arguments = p.GetCommandLine();
-                    if (arguments.Contains(mountable.Remote) && arguments.Contains("mount"))
-                    {
-                        _mounts.Add(mountable.Remote + Guid.NewGuid(), p.Id);
+                    if (IsMounted(mountable))
+                        continue;
 
-                        p.Exited += (_, _) =>
-                        {
-                            _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
-                        };
+                    if (Regex.IsMatch(arguments, $@"(^|[\s""]){Regex.Escape(mountable.Remote)}:"))
+                    {
+                        TrackMount(mountable, p);
+                        break;
                     }
                 }
             }
@@ -78,25 +83,25 @@ namespace ezRclone
 
                 void OnClick(object? sender, EventArgs args)
                 {
-                    if (string.IsNullOrEmpty(mountable.DriveLetter))
-                    {
-                        MessageBox.Show("Can't mount drive without a letter.", "Error", MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-                        return;
-                    }
-
                     if (sender is ToolStripMenuItem toolstripMenuItem)
                     {
                         if (IsMounted(mountable))
                         {
                             Unmount(mountable);
-                            toolstripMenuItem.Text = "Mount";
                         }
                         else
                         {
+                            if (string.IsNullOrEmpty(mountable.DriveLetter))
+                            {
+                                MessageBox.Show("Can't mount drive without a letter.", "Error", MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                                return;
+                            }
+
                             Mount(mountable);
-                            toolstripMenuItem.Text = "Unmount";
                         }
+
+                        toolstripMenuItem.Text = IsMounted(mountable) ? "Unmount" : "Mount";
                     }
                 }
 
@@ -108,22 +113,23 @@ namespace ezRclone
                 
                 contextMenu.Items.Add(item);
 
-                contextMenu.Opened += (sender, args) =>
-                {
-                    foreach (var m in _settings.Mountables)
-                    {
-                        if (contextMenu.Items[m.Remote] is ToolStripMenuItem itm)
-                        {
-                            itm.DropDownItems["itmMount"].Text = IsMounted(m) ? "Unmount" : "Mount";
-                        }
-                    }
-                };
-
                 if (mountable.AutoMount && !IsMounted(mountable))
                 {
                     Mount(mountable);
                 }
             }
+
+            contextMenu.Opened += (_, _) =>
+            {
+                foreach (var m in _settings.Mountables)
+                {
+                    if (contextMenu.Items[m.Remote] is ToolStripMenuItem { DropDownItems: var items } &&
+                        items["itmMount"] is { } itmMount)
+                    {
+                        itmMount.Text = IsMounted(m) ? "Unmount" : "Mount";
+                    }
+                }
+            };
 
             contextMenu.Items.Add("Mount All", null, (_, _) => MountAll());
             contextMenu.Items.Add("Unmount All", null, (_, _) => UnmountAll());
@@ -173,12 +179,28 @@ namespace ezRclone
 
         public void Unmount(Mountable mountable)
         {
-			Process.GetProcessById(_mounts[mountable.Remote]).Kill(true);
-            _mounts.Remove(mountable.Remote);
+            if (!_mounts.TryRemove(mountable.Remote, out var pid))
+                return;
+
+            try
+            {
+                Process.GetProcessById(pid).Kill(true);
+            }
+            catch (ArgumentException)
+            {
+                // The process has already exited.
+            }
+            catch (InvalidOperationException)
+            {
+                // The process exited while we were killing it.
+            }
         }
 
         public void Mount(Mountable mountable)
         {
+            if (string.IsNullOrEmpty(mountable.DriveLetter))
+                return;
+
             var psi = new ProcessStartInfo(Path.Combine(_settings.RclonePath, "rclone.exe"), $"mount {mountable.Remote}:\"{mountable.Path}\" {mountable.DriveLetter}:")
             {
                 CreateNoWindow = true
@@ -196,7 +218,18 @@ namespace ezRclone
 
             psi.Arguments += " --vfs-cache-mode writes";
 
-            var p = Process.Start(psi);
+            Process? p;
+            try
+            {
+                p = Process.Start(psi);
+            }
+            catch (Win32Exception e)
+            {
+                MessageBox.Show($"Failed to start rclone for {mountable.Remote}: {e.Message}\n\nCheck the rclone path in the manager.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (p == null)
             {
                 return;
@@ -207,12 +240,17 @@ namespace ezRclone
 	            return;
             }
 
-            p.Exited += (_, _) =>
-            {
-                _mounts.Remove(mountable.Remote); // make sure we're aware of the process being gone.
-            };
+            TrackMount(mountable, p);
+        }
 
-            _mounts[mountable.Remote] = p.Id;
+        private void TrackMount(Mountable mountable, Process p)
+        {
+            var mount = new KeyValuePair<string, int>(mountable.Remote, p.Id);
+            _mounts[mount.Key] = mount.Value;
+
+            // Only forget this exact process, the remote may have been remounted in the meantime.
+            p.Exited += (_, _) => _mounts.TryRemove(mount);
+            p.EnableRaisingEvents = true;
         }
 
         private string? _rcloneConfigPath;
